@@ -33,7 +33,7 @@ public class PauseMenuController : MonoBehaviour
         pauseCanvasgroup = MenuPanel.GetComponent<CanvasGroup>();
         if (pauseCanvasgroup == null)
         {
-            pauseCanvasgroup = TopAndroPanel.AddComponent<CanvasGroup>();
+            pauseCanvasgroup = MenuPanel.AddComponent<CanvasGroup>();
         }
         if (ResumeButton == null || MainMenuButton == null || no == null || PauseButton == null)
         {
@@ -127,5 +127,6 @@ public class PauseMenuController : MonoBehaviour
 
         cg.alpha = end;
     }
+
 
 }
