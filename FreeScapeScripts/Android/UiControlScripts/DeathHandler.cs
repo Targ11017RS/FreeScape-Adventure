@@ -31,8 +31,19 @@ public class DeathHandler : MonoBehaviour
 
     private void Start()
     {
+        // Defensive checks & helpful logs
+        if (deathScreen == null) Debug.LogWarning("DeathHandler: deathScreen not assigned in Inspector.");
+        if (youDiedGroup == null) Debug.LogWarning("DeathHandler: youDiedGroup not assigned in Inspector.");
+        if (buttonsGroup == null) Debug.LogWarning("DeathHandler: buttonsGroup not assigned in Inspector.");
+        if (respawnButton == null) Debug.LogWarning("DeathHandler: respawnButton not assigned in Inspector.");
+        if (LeftAndroPanel == null) Debug.LogWarning("DeathHandler: LeftAndroPanel not assigned in Inspector.");
+        if (RightAndroPanel == null) Debug.LogWarning("DeathHandler: RightAndroPanel not assigned in Inspector.");
+        if (TopAndroPanel == null) Debug.LogWarning("DeathHandler: TopAndroPanel not assigned in Inspector.");
+        if (BottomAndroPanel == null) Debug.LogWarning("DeathHandler: BottomAndroPanel not assigned in Inspector.");
+
         // Ensure UI starts hidden
-        deathScreen.SetActive(false);
+        if (deathScreen != null)
+            deathScreen.SetActive(false);
         SetCanvasGroup(youDiedGroup, 0f, false);
         SetCanvasGroup(buttonsGroup, 0f, false);
 
@@ -61,19 +72,22 @@ public class DeathHandler : MonoBehaviour
         if (isDead) return;
 
         isDead = true;
-        deathScreen.SetActive(true);
+        if (deathScreen != null)
+            deathScreen.SetActive(true);
 
         PlaySFX(deathSFX);
 
-        // Hide gameplay UI panels
-        LeftAndroPanel.SetActive(false);
-        RightAndroPanel.SetActive(false);
-        TopAndroPanel.SetActive(false);
-        BottomAndroPanel.SetActive(false);
+        // Hide gameplay UI panels (null-safe)
+        if (LeftAndroPanel != null) LeftAndroPanel.SetActive(false);
+        if (RightAndroPanel != null) RightAndroPanel.SetActive(false);
+        if (TopAndroPanel != null) TopAndroPanel.SetActive(false);
+        if (BottomAndroPanel != null) BottomAndroPanel.SetActive(false);
 
         // Fade in "You Died" and buttons
-        StartCoroutine(FadeInCanvasGroup(youDiedGroup, fadeDuration));
-        StartCoroutine(FadeInCanvasGroup(buttonsGroup, fadeDuration, fadeDuration * 0.5f));
+        if (youDiedGroup != null)
+            StartCoroutine(FadeInCanvasGroup(youDiedGroup, fadeDuration));
+        if (buttonsGroup != null)
+            StartCoroutine(FadeInCanvasGroup(buttonsGroup, fadeDuration, fadeDuration * 0.5f));
 
         // Pause background music
         if (audioSource != null)
@@ -87,19 +101,20 @@ public class DeathHandler : MonoBehaviour
     {
         if (!isDead) return;
 
-        isDead = false;
-
-        // Unfreeze time
+        // Make sure the game is unpaused immediately so subsequent calls don't get blocked
         Time.timeScale = 1f;
 
-        // Restore UI
-        LeftAndroPanel.SetActive(true);
-        RightAndroPanel.SetActive(true);
-        TopAndroPanel.SetActive(true);
-        BottomAndroPanel.SetActive(true);
+        isDead = false;
+
+        // Restore UI (null-safe)
+        if (LeftAndroPanel != null) LeftAndroPanel.SetActive(true);
+        if (RightAndroPanel != null) RightAndroPanel.SetActive(true);
+        if (TopAndroPanel != null) TopAndroPanel.SetActive(true);
+        if (BottomAndroPanel != null) BottomAndroPanel.SetActive(true);
 
         // Hide death screen
-        deathScreen.SetActive(false);
+        if (deathScreen != null)
+            deathScreen.SetActive(false);
 
         // Reset UI fade states
         SetCanvasGroup(youDiedGroup, 0f, false);
@@ -108,10 +123,14 @@ public class DeathHandler : MonoBehaviour
         // Resume background music
         if (audioSource != null)
         {
-            audioSource.clip = BGM;
+            // If we paused before, resume playback. If you want to restart the clip, call Play() after assigning clip.
+            if (BGM != null)
+                audioSource.clip = BGM;
             if (!audioSource.isPlaying)
                 audioSource.Play();
         }
+
+        Debug.Log("Respawn executed.");
     }
 
     void PlayClick()
@@ -130,6 +149,8 @@ public class DeathHandler : MonoBehaviour
     IEnumerator FadeInCanvasGroup(CanvasGroup group, float duration, float delay = 0f)
     {
         yield return new WaitForSecondsRealtime(delay);
+
+        if (group == null) yield break;
 
         group.gameObject.SetActive(true);
         group.interactable = false;
@@ -154,6 +175,7 @@ public class DeathHandler : MonoBehaviour
         group.alpha = alpha;
         group.interactable = interactable;
         group.blocksRaycasts = interactable;
+        // Keep group active only if visible
         group.gameObject.SetActive(alpha > 0f);
     }
 }
