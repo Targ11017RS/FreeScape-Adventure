@@ -33,15 +33,10 @@ public class FreeScapeRotation : MonoBehaviour
 
     void Start()
     {
-        
-
-
         yaw = transform.eulerAngles.y;
         pitch = cameraTransform.localEulerAngles.x;
         
         if (pitch > 180f) pitch -= 360f;
-
-
     }
 
     void Update()
